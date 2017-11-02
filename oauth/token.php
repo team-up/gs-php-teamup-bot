@@ -16,6 +16,6 @@ class Token {
 		$this->accessToken = $token->access_token;
 		$this->refreshToken = $token->refresh_token;
 		$this->tokenType = $token->token_type;
-		$this->expiresIn = time() + $token->expires_in - 10;
+		$this->expiresIn = time() + $token->expires_in - 60 * 5;
 	}
 }
