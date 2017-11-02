@@ -43,7 +43,8 @@ class baseApi {
 			// Status code가 2XX가 아닐경우 에러 throw
 			throw new ApiException($url, $responseCode);
 		}
-		return json_decode($result);
+		$json = json_decode($result);
+		return $json ? $json : $result;
 	}
 	private function parseHeaders($headers) {
 		$head = array('response_code' => 0);

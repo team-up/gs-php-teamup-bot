@@ -3,14 +3,17 @@ if (!defined('BASE_ROOT')) {
     define('BASE_ROOT', dirname(__DIR__));
 }
 require_once BASE_ROOT."/rest/ev.php";
+require_once BASE_ROOT."/rest/edge.php";
 
 class Bot {
 	private $ev;
+	private $edge;
 	private $lpWaitTime;
 	private $lpIdleTime;
 	private $errorCount = 0;
 	public function __construct() {
 		$this->ev = new Ev();
+		$this->edge = new Edge();
 		$data = $this->ev->getApiInfo();
 		if (empty($data) || !isset($data->lp_wait_timeout) || !isset($data->lp_idle_time)) {
 			throw new Exception("Couldn't get EV API data");
@@ -23,15 +26,16 @@ class Bot {
 			self::longPoll();
 		}
 	}
-	public function longPoll() {
+	private function longPoll() {
 		try {
 			$data = $this->ev->getEvent($this->lpWaitTime);
 			$this->errorCount = 0;
-			print_r($data);
-			if (empty($data)) {
+			if (empty($data) || empty($data->events)) {
 				sleep($this->lpIdleTime);
 				return ;
 			}
+			self::handleEvent($data->events);
+			return ;
 		} catch (ApiException $e) {
 			error_log($e);
 			$this->errorCount += 1;
@@ -67,5 +71,32 @@ class Bot {
 			throw $e;
 		}
 		sleep($this->lpIdleTime);
+	}
+	private function handleEvent($events) {
+		foreach ($events as $event) {
+			switch ($event->type) {
+				case 'chat.message':
+					self::handleChat($event->chat);
+					break;
+				case 'feed.feed':
+				case 'feed.reply':
+					self::handleFeed($event->feed);
+					break;
+			}
+		}
+	}
+	private function handleChat($chat) {
+		$message = $this->edge->getMessage($chat->room, $chat->msg);
+		$room = $chat->room;
+		// 장문 메시지 처리
+		if ($message->len !== mb_strlen($message->content)) {
+			$message = $this->edge->getLongMessage($chat->room, $chat->msg);
+			$this->edge->createMessage($room, $message);
+		} else {
+			$this->edge->createMessage($room, $message->content);
+		}
+	}
+	private function handleFeed($feed) {
+		// Do something
 	}
 }
