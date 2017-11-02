@@ -1,7 +1,4 @@
 <?php
-if (!defined('BASE_ROOT')) {
-    define('BASE_ROOT', dirname(__DIR__));
-}
 require_once BASE_ROOT."/rest/ev.php";
 require_once BASE_ROOT."/rest/edge.php";
 

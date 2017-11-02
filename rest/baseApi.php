@@ -1,9 +1,7 @@
 <?php
-if (!defined('BASE_ROOT')) {
-    define('BASE_ROOT', dirname(__DIR__));
-}
 require_once BASE_ROOT.'/include.php';
 require_once BASE_ROOT.'/oauth/oauth.php';
+
 class baseApi {
 	private $headers;
 	private $timeout = 5;
@@ -43,8 +41,7 @@ class baseApi {
 			// Status code가 2XX가 아닐경우 에러 throw
 			throw new ApiException($url, $responseCode);
 		}
-		return strpos($headers['Content-Type'], 'application/json') !== FALSE ?
-			json_decode($result, false, 512, JSON_BIGINT_AS_STRING) : $result;
+		return strpos($headers['Content-Type'], 'application/json') !== FALSE ? json_decode($result) : $result;
 	}
 	private function parseHeaders($headers) {
 		$head = array('response_code' => 0);
