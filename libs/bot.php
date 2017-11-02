@@ -8,6 +8,7 @@ class Bot {
 	private $ev;
 	private $lpWaitTime;
 	private $lpIdleTime;
+	private $errorCount = 0;
 	public function __construct() {
 		$this->ev = new Ev();
 		$data = $this->ev->getApiInfo();
@@ -19,24 +20,52 @@ class Bot {
 	}
 	public function run() {
 		while (TRUE) {
-			try {
-				self::longPoll();
-			} catch (Exception $e) {
-				print($e);
-				sleep(1);
-			}
+			self::longPoll();
 		}
 	}
 	public function longPoll() {
 		try {
 			$data = $this->ev->getEvent($this->lpWaitTime);
+			$this->errorCount = 0;
 			print_r($data);
+			if (empty($data)) {
+				sleep($this->lpIdleTime);
+				return ;
+			}
+		} catch (ApiException $e) {
+			error_log($e);
+			$this->errorCount += 1;
+			$statusCode = $e->getCode();
+			switch ($statusCode) {
+				case 400:
+				case 401:
+				case 403:
+				case 404:
+					throw $e;
+				default:
+					if ($this->errorCount >= 30) {
+						throw $e;
+					}
+			}
+		} catch (AuthException $e) {
+			error_log($e);
+			$this->errorCount += 1;
+			$statusCode = $e->getCode();
+			switch ($statusCode) {
+				case 200: // Auth API에서 error JSON 반환 시
+				case 400:
+				case 401:
+				case 403:
+				case 404:
+					throw $e;
+			}
+			if ($this->errorCount >= 5) {
+				throw $e;
+			}
 		} catch (Exception $e) {
-			print($e);
+			error_log($e);
+			throw $e;
 		}
-		if (empty($data)) {
-			sleep($this->lpIdleTime);
-			return ;
-		}
+		sleep($this->lpIdleTime);
 	}
 }

@@ -34,19 +34,19 @@ class baseApi {
 		}
 		$context = stream_context_create($options);
 		$result = file_get_contents($url, FALSE, $context);
-		if (empty($http_response_header)) {
-			throw new Exception('HTTP request failed');
-		}
-		$this->headers = self::parseHeaders($http_response_header);
-		$responseCode = $this->headers['response_code'];
-		// Status code가 2XX가 아닐경우 에러 throw
-		if ($responseCode[0] !== '2') {
-			throw new Exception('API Error: '.$this->headers['response_code']." URL:".$url);
+		$headers = self::parseHeaders($http_response_header);
+		$responseCode = $headers['response_code'];
+		if ($responseCode === '401') {
+			// 401 발생 시 토큰 강제 재발급
+			$this->oauth->getToken(true);
+		} elseif ($responseCode[0] !== '2') {
+			// Status code가 2XX가 아닐경우 에러 throw
+			throw new ApiException($url, $responseCode);
 		}
 		return json_decode($result);
 	}
 	private function parseHeaders($headers) {
-		$head = array();
+		$head = array('response_code' => 0);
 		foreach ($headers as $key => $value) {
 			$tmp = explode(':', $value, 2);
 			if	(isset($tmp[1])) {

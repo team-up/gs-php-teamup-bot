@@ -49,23 +49,25 @@ class OAuth {
 		));
 		$context = stream_context_create($options);
 		$result = file_get_contents($url, FALSE, $context);
-		$this->headers = self::parseHeaders($http_response_header);
-		if (empty($http_response_header)) {
-			throw new Exception('HTTP request failed');
-		}
-		// Status code가 2XX가 아닐경우 에러 throw
-		if ($this->headers['response_code'][0] !== '2') {
-			throw new Exception('API Error: '.$this->headers['response_code']." URL:".$url);
+		$headers = self::parseHeaders($http_response_header);
+		$responseCode = $headers['response_code'];
+		// Status code가 200이 아닐경우 에러 throw
+		if ($responseCode !== '200') {
+			throw new AuthException('Auth error :'.$url, $responseCode);
 		}
 		$response = json_decode($result);
 		if (empty($response) || empty($response->access_token)) {
-			throw new Exception('Auth error');
+			$msg = 'Unknown error';
+			if (isset($response->error)) {
+				$msg = $response->error;
+			}
+			throw new AuthException('Auth error : '.$msg, 200);
 		}
 		return $response;
 	}
 	
 	private function parseHeaders($headers) {
-		$head = array();
+		$head = array('response_code' => 0);
 		foreach ($headers as $key => $value) {
 			$tmp = explode(':', $value, 2);
 			if	(isset($tmp[1])) {
