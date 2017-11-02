@@ -6,32 +6,31 @@ require_once BASE_ROOT.'/include.php';
 require_once BASE_ROOT.'/oauth/oauth.php';
 class baseApi {
 	private $headers;
-	protected $timeout = 5;
+	private $timeout = 5;
 	private $oauth;
 	public function __construct() {
 		$this->oauth = new OAuth();
 	}
-	protected function get($url, $params = array()) {
+	protected function get($url, $params = array(), $options = array()) {
 		if ($params) {
 			$url .= "?".http_build_query($params);
 		}
-		return self::call($url);
+		$options['http']['method'] = 'GET';
+		return self::call($url, NULL, $options);
 	}
-	protected function post($url, $params = array()) {
-		return self::call($url, $params, 'POST');
+	protected function post($url, $params = array(), $options = array()) {
+		$options['http']['method'] = 'POST';
+		return self::call($url, $params, $options);
 	}
-	private function call($url, $params = NULL, $method = NULL) {
+	private function call($url, $params = NULL, $options = array()) {
 		$header = "Content-type: application/json\r\n";
 		$header .= "Authorization: {$this->oauth->getToken()}\r\n";
-		$options = array('http' => array(
-			'header' => $header,
-			'timeout' => $this->timeout
-		));
+		$options['http']['header'] = $header;
+		if (empty($options['http']['timeout'])) {
+			$options['http']['timeout'] = $this->timeout;
+		}
 		if (!empty($params)) {
 			$options['http']['content'] = json_encode($params);
-		}
-		if ($method) {
-			$options['http']['method'] = $method;
 		}
 		$context = stream_context_create($options);
 		$result = file_get_contents($url, FALSE, $context);
@@ -39,8 +38,9 @@ class baseApi {
 			throw new Exception('HTTP request failed');
 		}
 		$this->headers = self::parseHeaders($http_response_header);
+		$responseCode = $this->headers['response_code'];
 		// Status code가 2XX가 아닐경우 에러 throw
-		if ($this->headers['response_code'][0] !== '2') {
+		if ($responseCode[0] !== '2') {
 			throw new Exception('API Error: '.$this->headers['response_code']." URL:".$url);
 		}
 		return json_decode($result);

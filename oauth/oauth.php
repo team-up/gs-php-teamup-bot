@@ -10,11 +10,11 @@ class OAuth {
 	public function __construct() {
 		$this->token = Token::getInstance();
 	}
-	public function getToken() {
+	public function getToken($forceUpdate = FALSE) {
 		$token = $this->token;
 		if ($token->accessToken === NULL) {
 			$token->setToken(self::password());
-		} elseif (time() >= $token->expiresIn) {
+		} elseif (time() >= $token->expiresIn || $forceUpdate) {
 			try {
 				$token->setToken(self::refresh());
 			} catch (Exception $e) {
