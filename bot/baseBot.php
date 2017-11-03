@@ -2,12 +2,12 @@
 require_once BASE_ROOT."/rest/ev.php";
 require_once BASE_ROOT."/rest/edge.php";
 
-class Bot {
-	private $ev;
-	private $edge;
-	private $lpWaitTime;
-	private $lpIdleTime;
-	private $errorCount = 0;
+abstract class BaseBot {
+	protected $ev;
+	protected $edge;
+	protected $lpWaitTime;
+	protected $lpIdleTime;
+	protected $errorCount = 0;
 	public function __construct() {
 		$this->ev = new Ev();
 		$this->edge = new Edge();
@@ -20,10 +20,10 @@ class Bot {
 	}
 	public function run() {
 		while (TRUE) {
-			self::longPoll();
+			$this->longPoll();
 		}
 	}
-	private function longPoll() {
+	protected function longPoll() {
 		try {
 			$data = $this->ev->getEvent($this->lpWaitTime);
 			$this->errorCount = 0;
@@ -31,7 +31,7 @@ class Bot {
 				sleep($this->lpIdleTime);
 				return ;
 			}
-			self::handleEvent($data->events);
+			$this->handleEvent($data->events);
 			return ;
 		} catch (ApiException $e) {
 			error_log($e);
@@ -69,31 +69,7 @@ class Bot {
 		}
 		sleep($this->lpIdleTime);
 	}
-	private function handleEvent($events) {
-		foreach ($events as $event) {
-			switch ($event->type) {
-				case 'chat.message':
-					self::handleChat($event->chat);
-					break;
-				case 'feed.feed':
-				case 'feed.reply':
-					self::handleFeed($event->feed);
-					break;
-			}
-		}
-	}
-	private function handleChat($chat) {
-		$message = $this->edge->getMessage($chat->room, $chat->msg);
-		$room = $chat->room;
-		// 장문 메시지 처리
-		if ($message->len !== mb_strlen($message->content)) {
-			$message = $this->edge->getLongMessage($chat->room, $chat->msg);
-			$this->edge->createMessage($room, $message);
-		} else {
-			$this->edge->createMessage($room, $message->content);
-		}
-	}
-	private function handleFeed($feed) {
-		// Do something
-	}
+	protected abstract function handleEvent($events);
+	protected abstract function handleChat($chat);
+	protected abstract function handleFeed($feed);
 }

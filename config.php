@@ -7,3 +7,4 @@ define('CLIENT_ID', $config['client']['id']);
 define('CLIENT_SECRET', $config['client']['secret']);
 define('USERNAME', $config['user']['id']);
 define('PASSWORD', $config['user']['pw']);
+define('BOT_TYPE', $config['bot']['type']);

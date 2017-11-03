@@ -10,8 +10,7 @@ class Edge extends baseAPi {
 	public function getLongMessage($room, $msg) {
 		return self::get(EDGE_API_URL."/message/${room}/${msg}");
 	}
-	public function createMessage($room, $content) {
-		$data['content'] = $content;
+	public function createMessage($room, $data) {
 		return self::post(EDGE_API_URL."/message/${room}", $data);
 	}
 }
