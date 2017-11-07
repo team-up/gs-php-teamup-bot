@@ -39,7 +39,6 @@ abstract class BaseBot {
 			$statusCode = $e->getCode();
 			switch ($statusCode) {
 				case 400:
-				case 401:
 				case 403:
 				case 404:
 					throw $e;
