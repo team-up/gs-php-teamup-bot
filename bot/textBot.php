@@ -19,16 +19,18 @@ class TextBot extends BaseBot {
 		}
 	}
 	protected function handleChat($chat) {
+		$message = $this->edge->getMessage($chat->room, $chat->msg);
 		if ($message->type === 1) {
-			$message = $this->edge->getMessage($chat->room, $chat->msg);
 			$room = $chat->room;
-			// 장문 메시지 처리
-			if ($message->len !== mb_strlen($message->content)) {
-				$message = $this->edge->getLongMessage($chat->room, $chat->msg);
-				$data['content'] = $message;
+			if ($message->content[0] === '@' && $message->len > 1) {
+				// 장문 메시지 처리
+				if ($message->len !== mb_strlen($message->content)) {
+					$message->content = $this->edge->getLongMessage($room, $chat->msg);
+				}
+				$data['content'] = mb_substr($message->content, 1);
 				$this->edge->createMessage($room, $data);
-			} else {
-				$data['content'] = $message->content;
+			} elseif($message->content === '?') {
+				$data['content'] = '메시지 앞에 @를 붙여 전송하면 따라하는 봇';
 				$this->edge->createMessage($room, $data);
 			}
 		}
