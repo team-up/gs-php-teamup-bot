@@ -16,6 +16,7 @@ class OAuth {
 			try {
 				$token->setToken(self::refresh());
 			} catch (Exception $e) {
+				// refresh 실패 시 password로 재시도
 				$token->setToken(self::password());
 			}
 		}

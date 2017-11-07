@@ -20,6 +20,7 @@ class TextBot extends BaseBot {
 	}
 	protected function handleChat($chat) {
 		$message = $this->edge->getMessage($chat->room, $chat->msg);
+		// 메시지 전송에만 반응
 		if ($message->type === 1) {
 			$room = $chat->room;
 			if ($message->content[0] === '@' && $message->len > 1) {

@@ -47,6 +47,7 @@ class ButtonBot extends BaseBot {
 	}
 	protected function handleChat($chat) {
 		$message = $this->edge->getMessage($chat->room, $chat->msg);
+		// 메시지 전송에만 반응
 		if ($message->type === 1) {
 			if (!empty($message->extras) && $message->extras[0]->type === 'init') {
 				$this->handleInitMessage($chat->room, $message);
