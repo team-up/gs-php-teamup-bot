@@ -37,7 +37,8 @@ class baseApi {
 		if ($responseCode === '401') {
 			// 401 발생 시 토큰 강제 재발급
 			$this->oauth->getToken(true);
-		} elseif ($responseCode[0] !== '2') {
+		}
+		if ($responseCode[0] !== '2') {
 			// Status code가 2XX가 아닐경우 에러 throw
 			throw new ApiException($url, $responseCode);
 		}
