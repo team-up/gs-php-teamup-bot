@@ -63,8 +63,6 @@ class ButtonBot extends BaseBot {
 					'extras' => $this->extraExample
 				);
 				$this->edge->createMessage($room, $data);
-			} else {
-				$this->doEcho($room, $message->content);
 			}
 		}
 	}
@@ -80,9 +78,5 @@ class ButtonBot extends BaseBot {
 			);
 			$this->edge->createMessage($room, $data);
 		}
-	}
-	private function doEcho($room, $message) {
-		$data['content'] = $message;
-		$this->edge->createMessage($room, $data);
 	}
 }
