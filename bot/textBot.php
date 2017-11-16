@@ -24,8 +24,10 @@ class TextBot extends BaseBot {
 		if ($message->type === 1) {
 			$room = $chat->room;
 			if ($message->content[0] === '@' && $message->len > 1) {
-				$data['content'] = mb_substr($message->content, 1);
-				$this->edge->createMessage($room, $data);
+				$data['content'] = ltrim($message->content, '@');
+				if (strlen($data['content']) > 0) {
+					$this->edge->createMessage($room, $data);
+				}
 			} elseif($message->content === '?') {
 				$data['content'] = '메시지 앞에 @를 붙여 전송하면 따라하는 봇';
 				$this->edge->createMessage($room, $data);

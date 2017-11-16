@@ -2,7 +2,6 @@
 getting started teamup php bot
 
 ## php extension
-- mbstring
 - openssl
 
 ## Project 설정
