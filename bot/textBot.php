@@ -24,7 +24,7 @@ class TextBot extends BaseBot {
 		if ($message->type === 1) {
 			$room = $chat->room;
 			if ($message->content[0] === '@' && $message->len > 1) {
-				$data['content'] = ltrim($message->content, '@');
+				$data['content'] = ltrim($message->content, " \t\n\r\0\x0B@");
 				if (strlen($data['content']) > 0) {
 					$this->edge->createMessage($room, $data);
 				}
