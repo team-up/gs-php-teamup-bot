@@ -37,6 +37,8 @@ class baseApi {
 		if ($responseCode === '401') {
 			// 401 발생 시 토큰 강제 재발급
 			$this->oauth->getToken(true);
+			// 프로그램 종료하지 않고 강제로 long poll 하도록 설정
+			throw new ApiException($url, 200);
 		}
 		if ($responseCode[0] !== '2') {
 			// Status code가 2XX가 아닐경우 에러 throw

@@ -37,36 +37,23 @@ abstract class BaseBot {
 			error_log($e);
 			$this->errorCount += 1;
 			$statusCode = $e->getCode();
-			switch ($statusCode) {
-				case 400:
-				case 403:
-				case 404:
-					throw $e;
-				default:
-					if ($this->errorCount >= 30) {
-						throw $e;
-					}
+			// 400번대 에러, API 에러가 10번 연속 발생 시 프로그램 종료
+			if (intval($statusCode / 100) === 4 || $this->errorCount >= 10) {
+				throw $e;
 			}
 		} catch (AuthException $e) {
 			error_log($e);
 			$this->errorCount += 1;
 			$statusCode = $e->getCode();
-			switch ($statusCode) {
-				case 200: // Auth API에서 error JSON 반환 시
-				case 400:
-				case 401:
-				case 403:
-				case 404:
-					throw $e;
-			}
-			if ($this->errorCount >= 5) {
+			// 400 번대, Auth API에서 error JSON 반환 시, Auth 에러가 5번 연속 발생 시 프로그램 종료
+			if (intval($statusCode / 100) === 4 || $statusCode === 200 || $this->errorCount >= 5) {
 				throw $e;
 			}
 		} catch (Exception $e) {
 			error_log($e);
 			throw $e;
 		}
-		sleep($this->lpIdleTime);
+		sleep($this->lpIdleTime * $this->errorCount);
 	}
 	protected abstract function handleEvent($events);
 	protected abstract function handleChat($chat);
