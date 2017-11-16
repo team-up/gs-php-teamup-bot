@@ -54,10 +54,6 @@ class ButtonBot extends BaseBot {
 				return ;
 			}
 			$room = $chat->room;
-			// 장문 메시지 처리
-			if ($message->len !== mb_strlen($message->content)) {
-				$message->content = $this->edge->getLongMessage($room, $chat->msg);
-			}
 			if ($message->content === '버튼') {
 				$data = array(
 					'content' => '버튼',

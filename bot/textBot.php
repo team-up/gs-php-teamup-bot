@@ -24,10 +24,6 @@ class TextBot extends BaseBot {
 		if ($message->type === 1) {
 			$room = $chat->room;
 			if ($message->content[0] === '@' && $message->len > 1) {
-				// 장문 메시지 처리
-				if ($message->len !== mb_strlen($message->content)) {
-					$message->content = $this->edge->getLongMessage($room, $chat->msg);
-				}
 				$data['content'] = mb_substr($message->content, 1);
 				$this->edge->createMessage($room, $data);
 			} elseif($message->content === '?') {
